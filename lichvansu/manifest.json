@@ -1,8 +1,7 @@
 {
-    "domain": "lichvansu",
-    "name": "Lịch Vạn Sự việt Nam",
-    "documentation": "https://vnhass.blogspot.com",
-    "dependencies": [],
-    "codeowners": ["trumxuquang@gmail.com"],
-    "requirements": []
-    }
+  "domain": "lichvansu",
+  "name": "Lịch Vạn Sự việt Nam",
+  "documentation": "https://www.home-assistant.io",
+  "codeowners": ["@vlxxx"],
+  "quality_scale": "internal"
+}

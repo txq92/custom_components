@@ -1,5 +1,5 @@
 # encoding: utf-8
-
+# trumxuquang@gmail.com
 import math
 import re
 from datetime import datetime
@@ -21,7 +21,6 @@ url_year = '&year='
 def get_vansu():
     try:
         response = requests.get(url = url_source, verify = False).text
-
 
         #print(response)
         text_vn = response
@@ -52,9 +51,11 @@ def get_vansu():
         ##chia array 2
         arr2 = arr[2].split('<strong class="clr-red">')
         #print(arr2[1])
-        gioTot = arr2[1].replace('</strong> <table><tbody><tr><td>', ' ').replace('</td><td>', ', ').replace('</td></tr><tr><td>', ', ').replace('</td></tr></tbody></table></p><p>', '').replace('</strong><div class="giohh-cs"> <table><tbody><tr><td>','').replace('</td></tr></tbody></table></div></p><p>','').strip()
-
-        gioXau = arr2[2].replace('</strong> <table><tbody><tr><td>', ' ').replace('</td><td>', ', ').replace('</td></tr><tr><td>', ', ').replace('</td></tr></tbody></table></p><p>', '').replace('</strong><div class="giohh-cs"> <table><tbody><tr><td>','').replace('</td></tr></tbody></table></div></p><p>','').strip()
+        gioTot = arr2[1].replace('</strong> <table><tbody><tr><td>', ' ').replace('</td><td>', ', ').replace('</td></tr><tr><td>', ', ').replace('</td></tr></tbody></table></p><p>', '').replace('</strong><div class="giohh-cs"> <table><tbody><tr><td>', '').replace('</td></tr></tbody></table></div></p><p>', '').strip()
+        gioTot = tachhtml(gioTot)
+        
+        gioXau = arr2[2].replace('</strong> <table><tbody><tr><td>', ' ').replace('</td><td>', ', ').replace('</td></tr><tr><td>', ', ').replace('</td></tr></tbody></table></p><p>', '').strip()
+        gioXau = tachhtml(gioXau)
 
         tuoiHop = arr2[3].replace('<p>', ' ').replace('</td><td>', ', ').replace('</td></tr><tr><td>', ', ').replace('</strong>', '').strip()
 
@@ -62,7 +63,7 @@ def get_vansu():
 
         truc = arr2[5].replace('</strong><br>', ' ').replace('<br>', ', ').replace('</td></tr><tr><td>', ', ').replace('</p><p>', '').strip()
 
-        ngayTotXau = arr2[0].replace('</p><p>', ' ').replace('</strong><div class="giohh-cs"> <table><tbody><tr><td>','').replace('</td></tr></tbody></table></div></p><p>','').strip()
+        ngayTotXau = arr2[0].replace('</p><p>', ' ').strip()
 
         # onlydate
         onlyDay = amLich.split("/")[0]
@@ -110,7 +111,7 @@ def get_vansu():
         onlyDay = "NA"
         txt_tomo = "NA"
 
-    return {'amLich': amLich, 'saoTot': saoTot ,'saoXau': saoXau, 'gioTot': gioTot, 'gioXau': gioXau ,'ngayTotXau': ngayTotXau, 'truc':truc, 'tuoiHop':tuoiHop, 'tuoiXung':tuoiXung, 'onlyDay':onlyDay, 'tomorrowDay' :txt_tomo }
+    return {'amLich': amLich, 'saoTot': saoTot ,'saoXau': saoXau, 'gioTot': gioTot, 'gioXau': gioXau ,'ngayTotXau': ngayTotXau, 'truc':truc, 'tuoiHop':tuoiHop, 'tuoiXung':tuoiXung, 'ngay_homnay':onlyDay, 'ngay_mai' :txt_tomo }
     
 
 ''' Thuật toán tính âm lịch
@@ -588,7 +589,13 @@ def khoang_cach_AL(mm = 3, dd =10):
         dayxx = 365 + dayxx
 
     return dayxx
-print("BEGIN")
-xxx = get_vansu()
-print(xxx)
-print("END")
+
+def tachhtml(str):
+    str = str.replace('</td></tr></tbody></table></div></p><p>','').replace('</strong><div class="giohh-cs"> <table><tbody><tr><td>','')
+    return str.strip()
+  
+
+####
+print(get_vansu())
+print(kiemtra_amlich2())
+print(khoang_cach_AL(6, 17))

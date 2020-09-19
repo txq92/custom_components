@@ -1,1 +1,1 @@
-#Mr Trum Xu Quang
+"""The XXX component."""

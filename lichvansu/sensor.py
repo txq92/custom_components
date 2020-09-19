@@ -10,7 +10,6 @@ Them ngay dam gio tại #denNgayGio = lichvansu.khoang_cach_AL(6, 17)
 """
 
 from . import lichvansu
-from . import lunar
 
 from datetime import timedelta
 
@@ -39,11 +38,11 @@ OPTION_ATT = {
     "ngayTotXau": 'N/A',
     "tuoiHop": 'N/A',
     "tuoiXung": 'N/A',
-    "onlyDay": 'N/A',
-    "denMungMot": 'N/A',
-    "denNgayRam": 'N/A',
-    "denNgayGio01": 'N/A',
-    "denNgayGio02": 'N/A',
+    "ngay_homnay": 'N/A',
+    "ngay_mai": 'N/A',
+    "denMungMot": 0,
+    "denNgayRam": 0,
+    "damgio": 'N/A',
     "Copyright": "@TrumXuQuang",
 }
 
@@ -66,16 +65,6 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
 
 class vansu_class(Entity):
 
-    def __initXXXX__(self, option_type):
-        """Initialize the sensor."""
-        self._name = OPTION_TYPES[option_type]
-        self.type = option_type
-        self._state = None
-        self._author = '@trumxuquang'
-        self._description = 'lich van su Viet Nam'
-        self._attrs = OPTION_ATT
-        self.update()
-
     def __init__(self, hass, option_type):
         """Initialize the sensor."""
         self._name = OPTION_TYPES[option_type]
@@ -86,7 +75,6 @@ class vansu_class(Entity):
         self._description = 'lich van su Viet Nam'
         self._attrs = OPTION_ATT
         self.unsub = None
-
         self.update()
 
 
@@ -113,11 +101,21 @@ class vansu_class(Entity):
     def update(self):
         data = lichvansu.get_vansu()
         demngay = lichvansu.kiemtra_amlich2()
-        denNgayGio01x = lichvansu.khoang_cach_AL(6, 17)
-        denNgayGio02x = lichvansu.khoang_cach_AL(8, 20)
+        # them ngay thang am lich den dam gio (vd ngay 17 thang 6)
+        denNgayGio = lichvansu.khoang_cach_AL(6, 17)
+
         if self.type == "amLich":
             self._state = data['amLich']
             self._attrs['truc'] = data['truc']
+            self._attrs['ngayTotXau'] = data['ngayTotXau']
             self._attrs['saoTot'] = data['saoTot']
             self._attrs['saoXau'] = data['saoXau']
             self._attrs['gioTot'] = data['gioTot']
+            self._attrs['gioXau'] = data['gioXau']
+            self._attrs['tuoiHop'] = data['tuoiHop']
+            self._attrs['tuoiXung'] = data['tuoiXung']
+            self._attrs['ngay_homnay'] = data['ngay_homnay']
+            self._attrs['ngay_mai'] = data['ngay_mai']
+            self._attrs['denMungMot'] = demngay['days_left01']
+            self._attrs['denNgayRam'] = demngay['days_left15']
+            self._attrs['damgio'] = denNgayGio
