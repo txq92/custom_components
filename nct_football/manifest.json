@@ -1,0 +1,8 @@
+{
+  "domain": "nct_football",
+  "name": "nct_football",
+  "documentation": "https://github.com/rt400/School-Vacation",
+  "dependencies": [],
+  "codeowners": ["@yuval_mejahez"],
+  "requirements": []
+}
