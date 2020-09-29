@@ -1,2 +1,5 @@
 # custom_components
-vnhass.blogspot.com
+hướng dẫn chi tiết tại :
+
+https://vnhass.blogspot.com/
+
