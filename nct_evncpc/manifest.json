@@ -1,0 +1,8 @@
+{
+  "domain": "nct_evncpc",
+  "name": "nct_evncpc",
+  "documentation": "https://vnhass.blogspot.com",
+  "requirements": [],
+  "codeowners": ["trumxuquang@gmail.com"],
+  "quality_scale": "internal"
+}
