@@ -8,6 +8,7 @@ import asyncio
 import logging
 import socket
 import re
+import random
 
 import aiohttp
 import async_timeout
@@ -44,9 +45,11 @@ class HassioVersion(Version):
     async def get_version(self):
 
         self._version_data["copyright"] = "trumxuquang@gmail.com"
+        lst_url = ['https://protected-ocean-21066.herokuapp.com','https://mysterious-crag-20408.herokuapp.com']
+        choice_url = random.choice(lst_url)
 
-        url = f'https://protected-ocean-21066.herokuapp.com/evnhcm/{self._name}/data/{self._passwd}/date/{self._date}'
-        
+        url = f'{choice_url}/evnhcm/{self._name}/data/{self._passwd}/date/{self._date}'
+
         try:
             async with async_timeout.timeout(600, loop=self.loop):
                 response = await self.session.get(url)
