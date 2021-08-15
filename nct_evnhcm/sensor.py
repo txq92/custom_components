@@ -10,22 +10,25 @@ from homeassistant.const import CONF_NAME, CONF_SOURCE
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 import homeassistant.helpers.config_validation as cv
 from homeassistant.helpers.entity import Entity
-from homeassistant.util import Throttle
+from homeassistant.util import Throttle, dt
+
+from datetime import datetime, timedelta
 
 _LOGGER = logging.getLogger(__name__)
 
 CONF_PASS = "passwd"
-
+CONF_MA = "makhach"
 CONF_DATE = "day"
 
 ICON = "mdi:fingerprint"
 
-TIME_BETWEEN_UPDATES = timedelta(minutes=58)
+TIME_BETWEEN_UPDATES = timedelta(minutes=5)
 
 PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
     {
         vol.Optional(CONF_NAME, default="evnhcm"): cv.string,
         vol.Optional(CONF_PASS, default='1234567890'): cv.string,
+        vol.Optional(CONF_MA, default='xxx'): cv.string,
         vol.Optional(CONF_DATE, default='1'): cv.string,
     }
 )
@@ -36,13 +39,14 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
 
     name = config.get(CONF_NAME)
     passwd = config.get(CONF_PASS)
+    makhach = config.get(CONF_MA)
     date = config.get(CONF_DATE)
 
     #get session HA
-    session = async_get_clientsession(hass)
+    #session = async_get_clientsession(hass)
 
     #call xu ly data
-    haversion = VersionData(vnhass_util.HassioVersion(hass.loop, session, name, passwd, date))
+    haversion = VersionData(vnhass_util.HassioVersion(name, passwd , makhach, date))
 
     if not name:
         name = 'evnhcm'
@@ -60,24 +64,29 @@ class VersionSensor(Entity):
         self._name = name
         self._state = None
 
-    async def async_update(self):
+    def update(self):
         """Get the latest version information."""
-        await self.haversion.async_update()
+        self.haversion.update()
 
     @property
     def name(self):
         """Return the name of the sensor."""
-        return 'nct evnhcm sanluong'
+        return 'nct evnhcm'
+
+    @property
+    def device_class(self):
+        """Return the name of the sensor."""
+        return 'energy'
 
     @property
     def state(self):
         """Return the state of the sensor."""
-        return self.haversion.api.version
+        return self.haversion.api.state
 
     @property
     def device_state_attributes(self):
         """Return attributes for the sensor."""
-        return self.haversion.api.version_data
+        return self.haversion.api.attribute
 
     @property
     def icon(self):
@@ -87,7 +96,7 @@ class VersionSensor(Entity):
     @property
     def unit_of_measurement(self):
         """Return the unit of measurement."""
-        return 'kwh'
+        return 'kWh'
 
 class VersionData:
     """Get the latest data and update the states."""
@@ -97,6 +106,6 @@ class VersionData:
         self.api = api
 
     @Throttle(TIME_BETWEEN_UPDATES)
-    async def async_update(self):
+    def update(self):
         """Get the latest version information."""
-        await self.api.get_version()
+        self.api.get_version()

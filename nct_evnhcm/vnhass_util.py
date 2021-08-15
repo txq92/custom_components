@@ -4,93 +4,98 @@ A python module to the newest version number of Home Assistant.
 This code is released under the terms of the MIT license. See the LICENSE
 file for more details.
 """
-import asyncio
-import logging
-import socket
-import re
-import random
+import datetime
+import logging, evnhassio
 
-import aiohttp
-import async_timeout
 
 _LOGGER = logging.getLogger(__name__)
 
-
-class Version:
+class Khoitao:
     """A class for returning HA version information from different sources."""
-
-    def __init__(self, loop, session, name='evncpc', passwd='1234567890', date='1'):
+    def __init__(self, name='evnhcm', passw='aa' , makhach='xxx', numday='1'):
         """Initialize the class."""
-        self.loop = loop
-        self.session = session
-        self._version = None
+        self._state = 'n/a'
         self._name = name
-        self._passwd = passwd
-        self._date = date
-        self._version_data = {}
+        self._passw = passw
+        self._makhach = makhach
+        self._numday = numday
+        self._attribute = {}
 
     @property
-    def version(self):
+    def state(self):
         """Return the version."""
-        return self._version
+        return self._state
 
     @property
-    def version_data(self):
+    def attribute(self):
         """Return extended version data for supported sources."""
-        return self._version_data
+        return self._attribute
 
-class HassioVersion(Version):
+class HassioVersion(Khoitao):
     """Hass.io version."""
 
-    async def get_version(self):
+    def get_version(self):
 
-        self._version_data["copyright"] = "trumxuquang@gmail.com"
-        lst_url = ['https://protected-ocean-21066.herokuapp.com','https://mysterious-crag-20408.herokuapp.com']
-        choice_url = random.choice(lst_url)
-
-        url = f'{choice_url}/evnhcm/{self._name}/data/{self._passwd}/date/{self._date}'
-
+        try:  
+            api = evnhassio.API(self._name , self._passw)
+            data_out = api.get_evn_hcm(self._makhach)
+            #print(datajson)
+            #{'state': 'success', 'soNgay': 2, 'tieude': 'Từ 06/08/2021 đến 07/08/2021', 'ngay': '06/08', 'sanluong_tong': '22.57', 'tong_p_giao': '7,850.77'}
+            
+        except:
+            print("fuck you")
+            data_out ={'state': 'success', 'soNgay': 100, 'tieude': 'Từ 06/08/2021 đến 07/08/2021', 'ngay': '06/08', 'sanluong_tong': '100', 'tong_p_giao': '7,850.77'}
+        
+        # return data
+        #print(data_out)
+        tiendien = 0
         try:
-            async with async_timeout.timeout(600, loop=self.loop):
-                response = await self.session.get(url)
-                data = await response.json()
+          tiendien = float(data_out['sanluong_tong']) * 2014
+        except:
+          tiendien = 0
 
-                self._version = data['sanluong_day']
-                self._version_data["ma_khachhang"] = data['makh']
-                self._version_data["time_month"] = data['time_month']
-                self._version_data["sanluong_month"] = data['sanluong_month']
-                self._version_data["time_day"] = data['time_day']
-                self._version_data["sanluong_day"] = data['sanluong_day']
-                self._version_data["tienthangnay"] = data['tienthangnay']
-                self._version_data["tienthangtruoc"] = 'đang coding...'
-                self._version_data["tienhomqua"] = 'đang coding...'
-                self._version_data["ngaycupdien"] = 'đang coding...'
+        self._state = data_out['sanluong_tong']
+        self._attribute["tientamtinh"] = str(tiendien) + ' vnd'
+        self._attribute["ngay"] = data_out['ngay']
+        self._attribute["state_class"] = 'measurement'
+        today_date = datetime.datetime.now()
+        self._attribute["last_reset"] = today_date.strftime("%Y/%m/%dT00:00:00+00:00")
+        self._attribute["copyright"] = "trumxuquang@gmail.com"
+        #return datajson
 
 
-            _LOGGER.debug("Version: %s", self.version)
-            _LOGGER.debug("Version data: %s", self.version_data)
 
-        except asyncio.TimeoutError as error:
-            _LOGGER.error(
-                "Timeout error fetching version information from %s, %s",
-                self._version_data["ma_khachhang"],
-                error,
-            )
-        except (KeyError, TypeError) as error:
-            _LOGGER.error(
-                "Error parsing version information from %s, %s",
-                self._version_data["ma_khachhang"],
-                error,
-            )
-        except (aiohttp.ClientError, socket.gaierror) as error:
-            _LOGGER.error(
-                "Error fetching version information from %s, %s",
-                self._version_data["ma_khachhang"],
-                error,
-            )
-        except Exception as error:  # pylint: disable=broad-except
-            _LOGGER.critical("loi toi khong biet! - %s", error)
+##########################################################################################
+'''
+def kc_date(kc=1):
+    import datetime 
+    today = datetime.date.today()
+    today_date = today - datetime.timedelta(days = kc)
 
+    return {"kc_date":today_date.strftime("%d/%m/%Y"),"today":today.strftime("%d/%m/%Y"), 
+    }
+
+def getdata_extr(txt):
+
+    data_raw = txt.split("$('.text_result_tungaydenngay').html(\"")
+    try:
+        data=data_raw[1].split('\r\n')
+        time_do = data[0].replace('");','').strip()
+        sanluong = data[4].replace("$('.tong_cackhunggio').html(\"",'').strip()
+        sanluong = sanluong.replace('");','').strip()
+
+        input_makh ="hhh"
+        input_makh = data[19].strip().replace("input_makh: \"",'').strip()
+        input_makh = input_makh.replace('",','').strip()
+        #print(input_makh)
+        print()
+        #print(data[19])
+
+    except :
+        time_do ='None'
+        sanluong ='None'
+        input_makh = 'None'
+    return {"makh":input_makh, "time_do":time_do, "sanluong":sanluong}
 
 def extract_data(datajson):
 
@@ -137,11 +142,4 @@ def extract_data(datajson):
   'bao_dong2':bao_dong2,
   'bao_dong3':bao_dong3
   }
-
-def rm_html(string):
-
-  string = string.replace('<b>','')
-  string = string.replace('mm (24)','')
-  string = string.replace('mm (3 ngày)','')
-  string = string.replace('mm (7 ngày)</b>','')
-  return string
+'''
