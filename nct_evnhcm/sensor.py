@@ -22,7 +22,7 @@ CONF_DATE = "day"
 
 ICON = "mdi:fingerprint"
 
-TIME_BETWEEN_UPDATES = timedelta(minutes=5)
+TIME_BETWEEN_UPDATES = timedelta(minutes=14)
 
 PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
     {
