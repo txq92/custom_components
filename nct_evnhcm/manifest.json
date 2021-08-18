@@ -2,8 +2,8 @@
   "domain": "nct_evnhcm",
   "name": "nct_evnhcm",
   "documentation": "https://vnhass.blogspot.com",
-  "requirements": ["evnhassio==2.0.1"],
-  "version": "1.2.3",
+  "requirements": ["evnhassio==2021.8.19"],
+  "version": "1.2.4",
   "codeowners": ["trumxuquang@gmail.com"],
   "quality_scale": "internal"
 }

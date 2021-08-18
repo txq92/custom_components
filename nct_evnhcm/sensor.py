@@ -22,7 +22,9 @@ CONF_DATE = "day"
 
 ICON = "mdi:fingerprint"
 
-TIME_BETWEEN_UPDATES = timedelta(minutes=14)
+TIME_BETWEEN_UPDATES = timedelta(minutes=55)
+TIME_BETWEEN_UPDATES_SOLAR = timedelta(minutes=20)
+
 
 PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
     {
@@ -46,14 +48,35 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
     #session = async_get_clientsession(hass)
 
     #call xu ly data
-    haversion = VersionData(vnhass_util.HassioVersion(name, passwd , makhach, date))
+    evnhcm_grid = VersionData(vnhass_util.HassioVersion(name, passwd , makhach, date))
+    
+    evnhcm_solar = Solar(vnhass_util.HassioVersion(name, passwd , makhach, date))
 
-    if not name:
-        name = 'evnhcm'
-    if not passwd:
-        passwd = '1234567890'
-    async_add_entities([VersionSensor(haversion, name)], True)
+    async_add_entities([VersionSensor(evnhcm_grid, 'nct_evnhcm_grid'), VersionSensor(evnhcm_solar, 'nct_evnhcm_solar')], True)
 
+class VersionData:
+    """Get the latest data and update the states."""
+
+    def __init__(self, vnhass):
+        """Initialize the data object."""
+        self.vnhass = vnhass
+
+    @Throttle(TIME_BETWEEN_UPDATES)
+    def update(self):
+        """Get the latest version information."""
+        self.vnhass.get_evnhcm()
+
+class Solar:
+    """Get the latest data and update the states."""
+
+    def __init__(self, vnhass):
+        """Initialize the data object."""
+        self.vnhass = vnhass
+
+    @Throttle(TIME_BETWEEN_UPDATES_SOLAR)
+    def update(self):
+        """Get the latest version information."""
+        self.vnhass.get_evnhcm_solar()
 
 class VersionSensor(Entity):
     """Representation of a Home Assistant version sensor."""
@@ -71,7 +94,7 @@ class VersionSensor(Entity):
     @property
     def name(self):
         """Return the name of the sensor."""
-        return 'nct evnhcm'
+        return self._name
 
     @property
     def device_class(self):
@@ -81,12 +104,12 @@ class VersionSensor(Entity):
     @property
     def state(self):
         """Return the state of the sensor."""
-        return self.haversion.api.state
+        return self.haversion.vnhass.state
 
     @property
     def device_state_attributes(self):
         """Return attributes for the sensor."""
-        return self.haversion.api.attribute
+        return self.haversion.vnhass.attribute
 
     @property
     def icon(self):
@@ -98,14 +121,3 @@ class VersionSensor(Entity):
         """Return the unit of measurement."""
         return 'kWh'
 
-class VersionData:
-    """Get the latest data and update the states."""
-
-    def __init__(self, api):
-        """Initialize the data object."""
-        self.api = api
-
-    @Throttle(TIME_BETWEEN_UPDATES)
-    def update(self):
-        """Get the latest version information."""
-        self.api.get_version()

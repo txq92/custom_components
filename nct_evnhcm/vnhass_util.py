@@ -34,17 +34,17 @@ class Khoitao:
 class HassioVersion(Khoitao):
     """Hass.io version."""
 
-    def get_version(self):
+    def get_evnhcm(self):
 
         try:  
             api = evnhassio.API(self._name , self._passw)
             data_out = api.get_evn_hcm(self._makhach)
-            #print(datajson)
+            #print(data_out)
             #{'state': 'success', 'soNgay': 2, 'tieude': 'Từ 06/08/2021 đến 07/08/2021', 'ngay': '06/08', 'sanluong_tong': '22.57', 'tong_p_giao': '7,850.77'}
             
         except:
             print("fuck you")
-            data_out ={'state': 'success', 'soNgay': 100, 'tieude': 'Từ 06/08/2021 đến 07/08/2021', 'ngay': '06/08', 'sanluong_tong': '100', 'tong_p_giao': '7,850.77'}
+            data_out ={'state': 'error', 'soNgay': 100, 'tieude': 'Từ 06/08/2021 đến 07/08/2021', 'ngay': '06/08', 'sanluong_tong': '100', 'tong_p_giao': '7,850.77'}
         
         # return data
         #print(data_out)
@@ -54,15 +54,58 @@ class HassioVersion(Khoitao):
         except:
           tiendien = 0
 
-        self._state = data_out['sanluong_tong']
-        self._attribute["tientamtinh"] = str(tiendien) + ' vnd'
-        self._attribute["ngay"] = data_out['ngay']
-        self._attribute["state_class"] = 'measurement'
-        today_date = datetime.datetime.now()
-        self._attribute["last_reset"] = today_date.strftime("%Y/%m/%dT00:00:00+00:00")
-        self._attribute["copyright"] = "trumxuquang@gmail.com"
+        if  data_out['state'] in ['error']:
+          self._state = '0'
+          self._attribute["alert"] = "Công tơ của bạn chưa hỗ trợ đo theo ngày"
+          self._attribute["state_class"] = 'measurement'
+          today_date = datetime.datetime.now()
+          self._attribute["last_reset"] = today_date.strftime("%Y/%m/%dT00:00:00+00:00")
+          self._attribute["copyright"] = "trumxuquang@gmail.com"
+        else:
+          self._state = data_out['sanluong_tong']
+          self._attribute["alert"] = data_out['alert']
+          self._attribute["tong_p_giao"] = data_out['tong_p_giao']
+          self._attribute["tientamtinh"] = str(round(tiendien, 2)) + ' vnd'
+          self._attribute["ngayDo"] = data_out['ngayFull']
+          self._attribute["state_class"] = 'measurement'
+          today_date = datetime.datetime.now()
+          self._attribute["last_reset"] = today_date.strftime("%Y/%m/%dT00:00:00+00:00")
+          self._attribute["copyright"] = "trumxuquang@gmail.com"
         #return datajson
 
+    def get_evnhcm_solar(self):
+
+        try:
+            api = evnhassio.API(self._name , self._passw)
+            data_out = api.get_evn_hcm_solar(self._makhach)
+            #print(data_out)
+            #{'state': 'success', 'soNgay': 2, 'tieude': 'Từ 06/08/2021 đến 07/08/2021', 'ngay': '06/08', 'sanluong_tong': '22.57', 'tong_p_giao': '7,850.77'}
+            
+        except:
+            print("fuck you")
+            data_out = {'state': 'error', 'soNgay': 100, 'tieude': 'Từ 06/08/2021 đến 07/08/2021', 'ngay': '06/08', 'sanluong_tong': '100', 'tong_p_nhan': '7,850.77'}
+        
+        ######
+        if  data_out['state'] in ['error']:
+          self._state = '0'
+          self._attribute["alert"] = "Bạn không có sử dụng điện mặt trời"
+          self._attribute["state_class"] = 'measurement'
+          today_date = datetime.datetime.now()
+          self._attribute["last_reset"] = today_date.strftime("%Y/%m/%dT00:00:00+00:00")
+          self._attribute["copyright"] = "trumxuquang@gmail.com"
+        else:
+          self._state = data_out['sanluong_tong']
+          self._attribute["alert"] = data_out['alert']
+          self._attribute["tong_p_nhan"] = data_out['tong_p_nhan']
+          self._attribute["ngayDo"] = data_out['ngayFull']
+          self._attribute["sanluong_TD"] = data_out['sanluong_TD']
+          self._attribute["sanluong_BT"] = data_out['sanluong_BT']
+          self._attribute["sanluong_CD"] = data_out['sanluong_CD']
+          self._attribute["state_class"] = 'measurement'
+          today_date = datetime.datetime.now()
+          self._attribute["last_reset"] = today_date.strftime("%Y/%m/%dT00:00:00+00:00")
+          self._attribute["copyright"] = "trumxuquang@gmail.com"
+        #return datajson
 
 
 ##########################################################################################
