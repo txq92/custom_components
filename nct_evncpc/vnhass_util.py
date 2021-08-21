@@ -4,137 +4,71 @@ A python module to the newest version number of Home Assistant.
 This code is released under the terms of the MIT license. See the LICENSE
 file for more details.
 """
-import asyncio
-import logging
-import socket
-import re
+import datetime
+import logging, evncpc
 
-import aiohttp
-import async_timeout
 
 _LOGGER = logging.getLogger(__name__)
 
-
-class Version:
+class Khoitao:
     """A class for returning HA version information from different sources."""
-
-    def __init__(self, loop, session, name='evncpc', passwd='1234567890'):
+    def __init__(self, name='evnhcm', passw='aa'):
         """Initialize the class."""
-        self.loop = loop
-        self.session = session
-        self._version = None
+        self._state = 'n/a'
         self._name = name
-        self._passwd = passwd
-        self._version_data = {}
+        self._passw = passw
+        self._attribute = {}
 
     @property
-    def version(self):
+    def state(self):
         """Return the version."""
-        return self._version
+        return self._state
 
     @property
-    def version_data(self):
+    def attribute(self):
         """Return extended version data for supported sources."""
-        return self._version_data
+        return self._attribute
 
-class HassioVersion(Version):
+class HassioVersion(Khoitao):
     """Hass.io version."""
 
-    async def get_version(self):
+    def get_evn_cpc(self):
 
-        self._version_data["copyright"] = "trumxuquang@gmail.com"
+        try:  
+            api = evncpc.API(self._name , self._passw)
+            data_out = api.get_evn_cpc()
+            data_out['state'] = 'success'
+            #print(data_out)
 
-        url = f'http://evncpc.duckdns.org:8899/evn/{self._name}/data/{self._passwd}'
+        except:
+            print("fuck you")
+            data_out ={'state': 'error', 'soNgay': 100, 'tieude': 'Từ 06/08/2021 đến 07/08/2021', 'ngay': '06/08', 'sanluong_tong': '100', 'tong_p_giao': '7,850.77'}
         
-        try:
-            async with async_timeout.timeout(180, loop=self.loop):
-                response = await self.session.get(url)
-                data = await response.json()
+        # return data
 
-                self._version = data['sanLuong_thangnay']
-                self._version_data["ten_kh"] = data['ten_kh']
-                self._version_data["ma_khachhang"] = data['ma_khachhang']
-                self._version_data["tien_thangnay"] = data['tien_thangnay']
-                self._version_data["chiso_congto"] = data['chiso_congto']
-                self._version_data["thoidiemdo"] = data['thoidiemdo']
-                self._version_data["tienthangtruoc"] = data['tienthangtruoc']
-                self._version_data["ngaycupdien"] = data['ngaycupdien']
+        if  data_out['state'] in ['error']:
+          self._state = '0'
+          self._attribute["alert"] = "Công tơ của bạn chưa hỗ trợ đo theo ngày"
+          self._attribute["state_class"] = 'measurement'
+          today_date = datetime.datetime.now()
+          self._attribute["last_reset"] = today_date.strftime("%Y/%m/%dT00:00:00+00:00")
+          self._attribute["copyright"] = "trumxuquang@gmail.com"
+        else:
+          self._state = data_out['sanLuong_thangnay']
+          self._attribute["ma_khachhang"] = data_out['ma_khachhang']
+          self._attribute["tien_thangnay"] = data_out['tien_thangnay']
+          self._attribute["tienthangtruoc"] = data_out['tienthangtruoc']
+          self._attribute["ngayDo"] = data_out['chiso_date']
+          self._attribute["timeDo"] = data_out['chiso_time']
+          self._attribute["state_class"] = 'measurement'
+          today_date = datetime.datetime.now()
+          self._attribute["last_reset"] = today_date.strftime("%Y/%m/%dT00:00:00+00:00")
+          self._attribute["copyright"] = "trumxuquang@gmail.com"
 
-            _LOGGER.debug("Version: %s", self.version)
-            _LOGGER.debug("Version data: %s", self.version_data)
-
-        except asyncio.TimeoutError as error:
-            _LOGGER.error(
-                "Timeout error fetching version information from %s, %s",
-                self._version_data["ma_khachhang"],
-                error,
-            )
-        except (KeyError, TypeError) as error:
-            _LOGGER.error(
-                "Error parsing version information from %s, %s",
-                self._version_data["ma_khachhang"],
-                error,
-            )
-        except (aiohttp.ClientError, socket.gaierror) as error:
-            _LOGGER.error(
-                "Error fetching version information from %s, %s",
-                self._version_data["ma_khachhang"],
-                error,
-            )
-        except Exception as error:  # pylint: disable=broad-except
-            _LOGGER.critical("loi toi khong biet! - %s", error)
-
-
-def extract_data(datajson):
-
-  print(datajson)
-  time = datajson['labels'].split(",")
-  value = datajson['value'].split(",")
-
-  time_asis = time[len(time) - 1]
-  data_asis = value[len(value) - 1]
-
-  time_before = time[len(time) - 2]
-  data_before = value[len(value) - 2]
-
-  try:
-    total_rain = rm_html(datajson['total_rain'])
-    total_rain = total_rain.split(",")
-  
-    total_rain_1day =total_rain[0]
-    total_rain_3day =total_rain[1]
-    total_rain_7day =total_rain[2]
-
-  except :
-    total_rain_1day = 'None'
-    total_rain_3day ='None'
-    total_rain_7day ='None'
-  #nuoc song
-  try:
-    bao_dong1 = datajson['bao_dong1'].split(",")[1]
-    bao_dong2 = datajson['bao_dong2'].split(",")[1]
-    bao_dong3 = datajson['bao_dong3'].split(",")[1]
-  except :
-    bao_dong1 ='None'
-    bao_dong2 ='None'
-    bao_dong3 ='None'
-
-  return {'time_asis' : time_asis,
-  'data_asis':data_asis, 
-  'time_before':time_before, 
-  'data_before':data_before,
-  'total_rain_1day':total_rain_1day,
-  'total_rain_3day':total_rain_3day,
-  'total_rain_7day':total_rain_7day,
-  'bao_dong1':bao_dong1,
-  'bao_dong2':bao_dong2,
-  'bao_dong3':bao_dong3
-  }
-
-def rm_html(string):
-
-  string = string.replace('<b>','')
-  string = string.replace('mm (24)','')
-  string = string.replace('mm (3 ngày)','')
-  string = string.replace('mm (7 ngày)</b>','')
-  return string
+    def get_evncpc_solar(self):
+        self._state = '0'
+        self._attribute["alert"] = "Bạn không có sử dụng điện mặt trời"
+        self._attribute["state_class"] = 'measurement'
+        today_date = datetime.datetime.now()
+        self._attribute["last_reset"] = today_date.strftime("%Y/%m/%dT00:00:00+00:00")
+        self._attribute["copyright"] = "trumxuquang@gmail.com"

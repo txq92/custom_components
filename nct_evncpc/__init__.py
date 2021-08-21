@@ -1,2 +1,2 @@
-"""Lay chi so dien cho dien luc mien trung (https://cskh.cpc.vn/)."""
-"""dien luc noi khac vui long bo qua."""
+"""Lay chi so dien cho dien luc nct_evncpc."""
+"""lien he trumxuquang@gmail.com."""
