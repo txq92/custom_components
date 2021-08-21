@@ -62,11 +62,14 @@ class HassioVersion(Khoitao):
           self._attribute["last_reset"] = today_date.strftime("%Y/%m/%dT00:00:00+00:00")
           self._attribute["copyright"] = "trumxuquang@gmail.com"
         else:
-          self._state = data_out['sanluong_tong']
+          tong_p_giao = data_out['tong_p_giao']
+          tong_p_giao = tong_p_giao.replace(',','')
+          tong_p_giao = float(tong_p_giao)
+          self._state = round(tong_p_giao)
           self._attribute["alert"] = data_out['alert']
-          self._attribute["tong_p_giao"] = data_out['tong_p_giao']
+          self._attribute["thoidiemdo"] = data_out['thoidiemdo']
+          self._attribute["sanluong_ngay"] = data_out['sanluong_tong']
           self._attribute["tientamtinh"] = str(round(tiendien, 2)) + ' vnd'
-          self._attribute["ngayDo"] = data_out['ngayFull']
           self._attribute["state_class"] = 'measurement'
           today_date = datetime.datetime.now()
           self._attribute["last_reset"] = today_date.strftime("%Y/%m/%dT00:00:00+00:00")
@@ -94,10 +97,13 @@ class HassioVersion(Khoitao):
           self._attribute["last_reset"] = today_date.strftime("%Y/%m/%dT00:00:00+00:00")
           self._attribute["copyright"] = "trumxuquang@gmail.com"
         else:
-          self._state = data_out['sanluong_tong']
+          tong_p_giao = data_out['tong_p_nhan']
+          tong_p_giao = tong_p_giao.replace(',','')
+          tong_p_giao = float(tong_p_giao)
+          self._state = round(tong_p_giao)
           self._attribute["alert"] = data_out['alert']
-          self._attribute["tong_p_nhan"] = data_out['tong_p_nhan']
-          self._attribute["ngayDo"] = data_out['ngayFull']
+          self._attribute["sanluong_tong"] = data_out['sanluong_tong']
+          self._attribute["thoidiemdo"] = data_out['thoidiemdo']
           self._attribute["sanluong_TD"] = data_out['sanluong_TD']
           self._attribute["sanluong_BT"] = data_out['sanluong_BT']
           self._attribute["sanluong_CD"] = data_out['sanluong_CD']
