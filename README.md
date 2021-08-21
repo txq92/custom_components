@@ -1,5 +1,7 @@
 # custom_components
 hướng dẫn chi tiết tại :
+https://vnhass.blogspot.com/
+
 # nct_evnhcm
 
 /config/custom_components/nct_evnhcm/
@@ -10,5 +12,6 @@ sensor:
     passwd: 'passofyou'
     makhach: 'PE120001XXXXX'
 
-https://vnhass.blogspot.com/
+
+Email : trumxuquang@gmail.com
 
